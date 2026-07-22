@@ -1,0 +1,633 @@
+{
+  "info": {
+    "_postman_id": "dd19bfc1-1f2f-4cf2-955e-b259a05a583d",
+    "name": "Face and Body API",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54559960",
+    "_collection_link": "https://go.postman.co/collection/54559960-dd19bfc1-1f2f-4cf2-955e-b259a05a583d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Registrazione",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Luca\",\n  \"cognome\": \"Verdi\",\n  \"email\": \"luca.verdi@test.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/registrazione",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "registrazione"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Mario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "pm.environment.set(\"token_mario\", response.token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mario.rossi@test.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Giulia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "pm.environment.set(\"token_giulia\", response.token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"giulia.bianchi@test.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "pm.environment.set(\"token_admin\", response.token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@faceandbody.com\",\n  \"password\": \"admin12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Utenti",
+      "item": [
+        {
+          "name": "Lista utenti (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/utenti",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "utenti"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Servizi",
+      "item": [
+        {
+          "name": "Lista Servizi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/servizi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "servizi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crea Servizio (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Trattamento Anticellulite\",\n  \"descrizione\": \"Trattamento drenante e rimodellante\",\n  \"prezzo\": 45.00,\n  \"durataMuniti\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/servizi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "servizi"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recensioni",
+      "item": [
+        {
+          "name": "Segna Appuntamento Completato (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti/1/completa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti",
+                "1",
+                "completa"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crea Recensione (Mario)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_mario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appuntamentoId\": 1,\n  \"voto\": 5,\n  \"commento\": \"Servizio eccellente, molto soddisfatto!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recensioni",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recensioni"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mie recensioni (Mario)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_mario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/recensioni/mie",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recensioni",
+                "mie"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Appuntamenti",
+      "item": [
+        {
+          "name": "Prenota Appuntamento (Mario)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "pm.environment.set(\"appuntamento_id_mario\", response.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_mario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"servizioId\": 1,\n  \"dataOra\": \"2026-09-01T10:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Miei Appuntamenti (Mario)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_mario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti/miei",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti",
+                "miei"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancella Appuntamento Giulia su Mario (deve fallire)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_giulia}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti/{{appuntamento_id_mario}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti",
+                "{{appuntamento_id_mario}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancella appuntamenti Mario (deve riuscire)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_mario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti/{{appuntamento_id_mario}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti",
+                "{{appuntamento_id_mario}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Disponibilità slot",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_mario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti/disponibilita?servizioId=1&inizio=2026-08-01T00:00:00&fine=2026-08-31T23:59:59",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti",
+                "disponibilita"
+              ],
+              "query": [
+                {
+                  "key": "servizioId",
+                  "value": "1"
+                },
+                {
+                  "key": "inizio",
+                  "value": "2026-08-01T00:00:00"
+                },
+                {
+                  "key": "fine",
+                  "value": "2026-08-31T23:59:59"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pacchetti",
+      "item": [
+        {
+          "name": "Lista pacchetti",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pacchetti",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacchetti"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Acquisto pacchetto (Mario)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_mario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pacchetti/1/acquista",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacchetti",
+                "1",
+                "acquista"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Miei Abbonamenti",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_mario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pacchetti/miei-abbonamenti",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacchetti",
+                "miei-abbonamenti"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Environment / secrets locali
+.env
+
+# Node (per il frontend che arriverà)
+node_modules/
+dist/
+build/
