@@ -12,31 +12,32 @@ function Footer() {
               Face and Body
             </h5>
             <p style={{ fontSize: '0.9rem', opacity: 0.85 }}>
-              Il tuo centro estetico di fiducia. Bellezza e benessere in un ambiente elegante e rilassante.
+              Pelle curata e mente leggera. Il tuo centro estetico di fiducia a Viareggio,
+              specializzato in trattamenti mirati e benessere su misura.
             </p>
           </Col>
           <Col md={4}>
             <h6 style={{ color: '#F7F1E6' }}>Contatti</h6>
             <p style={{ fontSize: '0.9rem', opacity: 0.85, marginBottom: '0.4rem' }}>
               <FaMapMarkerAlt style={{ marginRight: '0.5rem' }} />
-              Via delle Rose 12, Torino
+              Via Amerigo Vespucci 167, Viareggio
             </p>
             <p style={{ fontSize: '0.9rem', opacity: 0.85, marginBottom: '0.4rem' }}>
               <FaPhone style={{ marginRight: '0.5rem' }} />
-              +39 011 1234567
+              329 802 0391
             </p>
             <p style={{ fontSize: '0.9rem', opacity: 0.85 }}>
               <FaEnvelope style={{ marginRight: '0.5rem' }} />
-              info@faceandbody.it
+              faceandbody@alice.it
             </p>
           </Col>
           <Col md={4}>
             <h6 style={{ color: '#F7F1E6' }}>Seguici</h6>
             <div style={{ fontSize: '1.3rem' }}>
-              <a href="https://www.instagram.com/_faceandbody_/" style={{ color: '#EFE6D8', marginRight: '1rem' }}>
+              <a href="https://www.instagram.com/_faceandbody_/" target="_blank" rel="noreferrer" style={{ color: '#EFE6D8', marginRight: '1rem' }}>
                 <FaInstagram />
               </a>
-              <a href="https://www.facebook.com/faceandbody2/?locale=it_IT" style={{ color: '#EFE6D8' }}>
+              <a href="https://www.facebook.com/faceandbody2" target="_blank" rel="noreferrer" style={{ color: '#EFE6D8' }}>
                 <FaFacebookF />
               </a>
             </div>
