@@ -10,6 +10,7 @@ import Registrati from './pages/Registrati';
 import Prenota from './pages/Prenota';
 import MieiAbbonamenti from './pages/MieiAbbonamenti';
 import MieRecensioni from './pages/MieRecensioni';
+import Admin from './pages/Admin';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/prenota" element={<Prenota />} />
         <Route path="/miei-abbonamenti" element={<MieiAbbonamenti />} />
         <Route path="/mie-recensioni" element={<MieRecensioni />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
       <Footer />
     </BrowserRouter>
