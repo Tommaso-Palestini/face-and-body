@@ -24,7 +24,7 @@ function AppNavbar() {
 
   return (
     <BsNavbar expand="lg" style={{ backgroundColor: '#24392A' }} variant="dark" sticky="top">
-      <Container>
+      <Container className="d-flex align-items-center flex-wrap">
         <BsNavbar.Brand
           as={NavLink}
           to="/"
@@ -33,64 +33,67 @@ function AppNavbar() {
           <FaLeaf style={{ marginRight: '0.5rem', marginBottom: '4px' }} />
           Face and Body
         </BsNavbar.Brand>
-        <BsNavbar.Toggle aria-controls="main-navbar" />
-        <BsNavbar.Collapse id="main-navbar">
-          <div className="d-lg-flex w-100 align-items-center justify-content-between">
-            <Nav className="d-lg-flex justify-content-lg-evenly flex-lg-grow-1 mx-lg-4">
-              <Nav.Link as={NavLink} to="/" style={navLinkStyle} end>
-                Home
-              </Nav.Link>
-              <Nav.Link as={NavLink} to="/servizi" style={navLinkStyle}>
-                Servizi
-              </Nav.Link>
-              <Nav.Link as={NavLink} to="/pacchetti" style={navLinkStyle}>
-                Pacchetti
-              </Nav.Link>
-              <Nav.Link as={NavLink} to="/chi-siamo" style={navLinkStyle}>
-                Chi Siamo
-              </Nav.Link>
-              {isAdmin && (
-                <Nav.Link as={NavLink} to="/admin" style={navLinkStyle}>
-                  Dashboard
-                </Nav.Link>
-              )}
-            </Nav>
 
-            <div className="d-flex align-items-center mt-3 mt-lg-0">
-              {isAuthenticated ? (
-                <NavDropdown
-                  title={
-                    <span style={{ color: '#F7F1E6' }}>
-                      <FaUserCircle style={{ marginRight: '0.4rem', marginBottom: '2px' }} />
-                      {utente.nome}
-                    </span>
-                  }
-                  align="end"
-                  className="me-2"
-                >
-                  <NavDropdown.Item onClick={() => navigate('/prenota')}>
-                    I miei appuntamenti
-                  </NavDropdown.Item>
-                  <NavDropdown.Item onClick={() => navigate('/miei-abbonamenti')}>
-                    I miei abbonamenti
-                  </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={handleLogout}>Esci</NavDropdown.Item>
-                </NavDropdown>
-              ) : (
-                <Button variant="outline-light" className="me-2" onClick={() => navigate('/login')}>
-                  Accedi
-                </Button>
-              )}
+        {/* Zona sempre visibile: utente/accedi + prenota + toggle hamburger */}
+        <div className="d-flex align-items-center order-lg-3 ms-auto">
+          {isAuthenticated ? (
+            <NavDropdown
+              title={
+                <span style={{ color: '#F7F1E6' }}>
+                  <FaUserCircle style={{ marginRight: '0.4rem', marginBottom: '2px' }} />
+                  {utente.nome}
+                </span>
+              }
+              align="end"
+              className="me-2"
+            >
+              <NavDropdown.Item onClick={() => navigate('/prenota')}>
+                I miei appuntamenti
+              </NavDropdown.Item>
+              <NavDropdown.Item onClick={() => navigate('/miei-abbonamenti')}>
+                I miei abbonamenti
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item onClick={handleLogout}>Esci</NavDropdown.Item>
+            </NavDropdown>
+          ) : (
+            <Button variant="outline-light" className="me-2" onClick={() => navigate('/login')}>
+              Accedi
+            </Button>
+          )}
 
-              <Button
-                style={{ backgroundColor: '#6B8F71', borderColor: '#6B8F71' }}
-                onClick={() => navigate('/prenota')}
-              >
-                Prenota
-              </Button>
-            </div>
-          </div>
+          <Button
+            style={{ backgroundColor: '#6B8F71', borderColor: '#6B8F71' }}
+            className="me-2"
+            onClick={() => navigate('/prenota')}
+          >
+            Prenota
+          </Button>
+
+          <BsNavbar.Toggle aria-controls="main-navbar" />
+        </div>
+
+        {/* Zona collassabile: solo i link di navigazione */}
+        <BsNavbar.Collapse id="main-navbar" className="order-lg-2 flex-grow-1 mt-3 mt-lg-0">
+          <Nav className="d-lg-flex justify-content-lg-evenly w-100 mx-lg-4">
+            <Nav.Link as={NavLink} to="/" style={navLinkStyle} end>
+              Home
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/servizi" style={navLinkStyle}>
+              Servizi
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/pacchetti" style={navLinkStyle}>
+              Pacchetti
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/chi-siamo" style={navLinkStyle}>
+              Chi Siamo
+            </Nav.Link>
+            {isAdmin && (
+              <Nav.Link as={NavLink} to="/admin" style={navLinkStyle}>
+                Dashboard
+              </Nav.Link>
+            )}
+          </Nav>
         </BsNavbar.Collapse>
       </Container>
     </BsNavbar>

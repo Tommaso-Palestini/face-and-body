@@ -8,6 +8,7 @@ import ChiSiamo from './pages/ChiSiamo';
 import Login from './pages/Login';
 import Registrati from './pages/Registrati';
 import Prenota from './pages/Prenota';
+import MieiAbbonamenti from './pages/MieiAbbonamenti';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registrati" element={<Registrati />} />
         <Route path="/prenota" element={<Prenota />} />
+        <Route path="/miei-abbonamenti" element={<MieiAbbonamenti />} />
       </Routes>
       <Footer />
     </BrowserRouter>
