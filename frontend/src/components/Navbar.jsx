@@ -1,6 +1,7 @@
-import { Navbar as BsNavbar, Nav, Container, Button } from 'react-bootstrap';
+import { Navbar as BsNavbar, Nav, Container, Button, NavDropdown } from 'react-bootstrap';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FaLeaf } from 'react-icons/fa';
+import { FaLeaf, FaUserCircle } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
 const navLinkStyle = ({ isActive }) => ({
   color: isActive ? '#F7F1E6' : '#EFE6D8',
@@ -14,6 +15,12 @@ const navLinkStyle = ({ isActive }) => ({
 
 function AppNavbar() {
   const navigate = useNavigate();
+  const { isAuthenticated, isAdmin, utente, logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+    navigate('/');
+  }
 
   return (
     <BsNavbar expand="lg" style={{ backgroundColor: '#24392A' }} variant="dark" sticky="top">
@@ -42,20 +49,45 @@ function AppNavbar() {
               <Nav.Link as={NavLink} to="/chi-siamo" style={navLinkStyle}>
                 Chi Siamo
               </Nav.Link>
+              {isAdmin && (
+                <Nav.Link as={NavLink} to="/admin" style={navLinkStyle}>
+                  Dashboard
+                </Nav.Link>
+              )}
             </Nav>
+
             <div className="d-flex align-items-center mt-3 mt-lg-0">
-              <Button
-                variant="outline-light"
-                className="me-2"
-                onClick={() => navigate('/login')}
-              >
-                Accedi
-              </Button>
+              {isAuthenticated ? (
+                <NavDropdown
+                  title={
+                    <span style={{ color: '#F7F1E6' }}>
+                      <FaUserCircle style={{ marginRight: '0.4rem', marginBottom: '2px' }} />
+                      {utente.nome}
+                    </span>
+                  }
+                  align="end"
+                  className="me-2"
+                >
+                  <NavDropdown.Item onClick={() => navigate('/prenota')}>
+                    I miei appuntamenti
+                  </NavDropdown.Item>
+                  <NavDropdown.Item onClick={() => navigate('/miei-abbonamenti')}>
+                    I miei abbonamenti
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item onClick={handleLogout}>Esci</NavDropdown.Item>
+                </NavDropdown>
+              ) : (
+                <Button variant="outline-light" className="me-2" onClick={() => navigate('/login')}>
+                  Accedi
+                </Button>
+              )}
+
               <Button
                 style={{ backgroundColor: '#6B8F71', borderColor: '#6B8F71' }}
-                onClick={() => navigate('/registrati')}
+                onClick={() => navigate('/prenota')}
               >
-                Prenota Ora
+                Prenota
               </Button>
             </div>
           </div>

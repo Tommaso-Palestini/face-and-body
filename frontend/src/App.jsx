@@ -5,6 +5,9 @@ import Home from './pages/Home';
 import Servizi from './pages/Servizi';
 import Pacchetti from './pages/Pacchetti';
 import ChiSiamo from './pages/ChiSiamo';
+import Login from './pages/Login';
+import Registrati from './pages/Registrati';
+import Prenota from './pages/Prenota';
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
         <Route path="/servizi" element={<Servizi />} />
         <Route path="/pacchetti" element={<Pacchetti />} />
         <Route path="/chi-siamo" element={<ChiSiamo />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registrati" element={<Registrati />} />
+        <Route path="/prenota" element={<Prenota />} />
       </Routes>
       <Footer />
     </BrowserRouter>
