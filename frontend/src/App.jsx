@@ -1,13 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AppNavbar from './components/Navbar';
 import Footer from './components/Footer';
+import Home from './pages/Home';
+import Servizi from './pages/Servizi';
 
 function App() {
   return (
     <BrowserRouter>
       <AppNavbar />
       <Routes>
-        <Route path="/" element={<div style={{ padding: '4rem', textAlign: 'center' }}>Home in arrivo</div>} />
+        <Route path="/" element={<Home />} />
+        <Route path="/servizi" element={<Servizi />} />
       </Routes>
       <Footer />
     </BrowserRouter>
