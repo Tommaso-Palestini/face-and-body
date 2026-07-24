@@ -30,6 +30,14 @@ public class Appuntamento {
     @JoinColumn(name = "servizio_id", nullable = false)
     private Servizio servizio;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "operatrice_id")
+    private Operatrice operatrice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cabina_id")
+    private Cabina cabina;
+
     @Column(nullable = false)
     private LocalDateTime dataOra; // data e ora dell'appuntamento
 

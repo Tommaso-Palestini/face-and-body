@@ -53,8 +53,9 @@ function ChiSiamo() {
               style={{
                 width: '100%',
                 borderRadius: '12px',
-                objectFit: 'cover',
+                objectFit: 'contain',
                 maxHeight: '400px',
+                backgroundColor: '#EFE6D8',
               }}
             />
           </Col>
