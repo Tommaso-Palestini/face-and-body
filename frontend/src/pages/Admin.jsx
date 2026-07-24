@@ -123,6 +123,196 @@ function TabServizi({ token }) {
   );
 }
 
+function TabPacchetti({ token }) {
+  const [pacchetti, setPacchetti] = useState([]);
+  const [servizi, setServizi] = useState([]);
+  const [caricamento, setCaricamento] = useState(true);
+  const [errore, setErrore] = useState(null);
+  const [messaggio, setMessaggio] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [pacchettoInModifica, setPacchettoInModifica] = useState(null);
+  const [salvataggioInCorso, setSalvataggioInCorso] = useState(false);
+
+  const [nome, setNome] = useState('');
+  const [descrizione, setDescrizione] = useState('');
+  const [prezzo, setPrezzo] = useState('');
+  const [righeServizi, setRigheServizi] = useState([{ servizioId: '', quantitaInclusa: '' }]);
+
+  function carica() {
+    apiFetch('/api/pacchetti', token)
+      .then((data) => { setPacchetti(data); setCaricamento(false); })
+      .catch((err) => { setErrore(err.message); setCaricamento(false); });
+  }
+  useEffect(carica, [token]);
+
+  useEffect(() => {
+    apiFetch('/api/servizi', token).then(setServizi).catch(() => {});
+  }, [token]);
+
+  function apriCreazione() {
+    setPacchettoInModifica(null);
+    setNome('');
+    setDescrizione('');
+    setPrezzo('');
+    setRigheServizi([{ servizioId: '', quantitaInclusa: '' }]);
+    setShowModal(true);
+  }
+
+  function apriModifica(p) {
+    setPacchettoInModifica(p);
+    setNome(p.nome);
+    setDescrizione(p.descrizione || '');
+    setPrezzo(String(p.prezzo));
+    setRigheServizi(
+      p.servizi.length > 0
+        ? p.servizi.map((s) => ({ servizioId: String(s.servizioId), quantitaInclusa: String(s.quantitaInclusa) }))
+        : [{ servizioId: '', quantitaInclusa: '' }]
+    );
+    setShowModal(true);
+  }
+
+  function aggiungiRiga() {
+    setRigheServizi([...righeServizi, { servizioId: '', quantitaInclusa: '' }]);
+  }
+  function rimuoviRiga(index) {
+    setRigheServizi(righeServizi.filter((_, i) => i !== index));
+  }
+  function aggiornaRiga(index, campo, valore) {
+    const nuove = [...righeServizi];
+    nuove[index][campo] = valore;
+    setRigheServizi(nuove);
+  }
+
+  async function handleSalva(e) {
+    e.preventDefault();
+    setErrore(null);
+    setSalvataggioInCorso(true);
+    try {
+      const serviziValidi = righeServizi
+        .filter((r) => r.servizioId && r.quantitaInclusa)
+        .map((r) => ({ servizioId: Number(r.servizioId), quantitaInclusa: Number(r.quantitaInclusa) }));
+
+      if (serviziValidi.length === 0) {
+        throw new Error('Aggiungi almeno un servizio al pacchetto');
+      }
+
+      const body = JSON.stringify({ nome, descrizione, prezzo: Number(prezzo), servizi: serviziValidi });
+
+      if (pacchettoInModifica) {
+        await apiFetch(`/api/pacchetti/${pacchettoInModifica.id}`, token, { method: 'PUT', body });
+        setMessaggio('Pacchetto aggiornato.');
+      } else {
+        await apiFetch('/api/pacchetti', token, { method: 'POST', body });
+        setMessaggio('Pacchetto creato.');
+      }
+      setShowModal(false);
+      carica();
+    } catch (err) { setErrore(err.message); }
+    finally { setSalvataggioInCorso(false); }
+  }
+
+  async function handleDisattiva(id) {
+    if (!window.confirm('Eliminare/disattivare questo pacchetto?')) return;
+    try {
+      await apiFetch(`/api/pacchetti/${id}`, token, { method: 'DELETE' });
+      setMessaggio('Pacchetto disattivato.');
+      carica();
+    } catch (err) { setErrore(err.message); }
+  }
+
+  return (
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4>Pacchetti</h4>
+        <Button style={{ backgroundColor: '#3B5D45', borderColor: '#3B5D45' }} onClick={apriCreazione}>
+          <FaPlus style={{ marginRight: '0.4rem' }} />Nuovo Pacchetto
+        </Button>
+      </div>
+      {errore && <Alert variant="danger" onClose={() => setErrore(null)} dismissible>{errore}</Alert>}
+      {messaggio && <Alert variant="success" onClose={() => setMessaggio(null)} dismissible>{messaggio}</Alert>}
+      {!caricamento && (
+        <Table responsive hover style={{ backgroundColor: '#EFE6D8' }}>
+          <thead><tr><th>Nome</th><th>Prezzo</th><th>Servizi inclusi</th><th>Azioni</th></tr></thead>
+          <tbody>
+            {pacchetti.map((p) => (
+              <tr key={p.id}>
+                <td>{p.nome}</td>
+                <td>€{p.prezzo}</td>
+                <td>{p.servizi.map((s) => `${s.servizioNome} x${s.quantitaInclusa}`).join(', ')}</td>
+                <td>
+                  <Button variant="outline-secondary" size="sm" className="me-2" onClick={() => apriModifica(p)}><FaEdit /></Button>
+                  <Button variant="outline-danger" size="sm" onClick={() => handleDisattiva(p.id)}><FaBan /></Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+        <Modal.Header closeButton><Modal.Title>{pacchettoInModifica ? 'Modifica' : 'Nuovo'} Pacchetto</Modal.Title></Modal.Header>
+        <Form onSubmit={handleSalva}>
+          <Modal.Body>
+            <Form.Group className="mb-3">
+              <Form.Label>Nome</Form.Label>
+              <Form.Control value={nome} onChange={(e) => setNome(e.target.value)} required />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Descrizione</Form.Label>
+              <Form.Control as="textarea" rows={2} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Prezzo (€)</Form.Label>
+              <Form.Control type="number" step="0.01" value={prezzo} onChange={(e) => setPrezzo(e.target.value)} required />
+            </Form.Group>
+
+            <Form.Label>Servizi inclusi</Form.Label>
+            {righeServizi.map((riga, index) => (
+              <Row key={index} className="mb-2 align-items-center">
+                <Col md={6}>
+                  <Form.Select
+                    value={riga.servizioId}
+                    onChange={(e) => aggiornaRiga(index, 'servizioId', e.target.value)}
+                  >
+                    <option value="">Seleziona servizio...</option>
+                    {servizi.map((s) => (
+                      <option key={s.id} value={s.id}>{s.nome}</option>
+                    ))}
+                  </Form.Select>
+                </Col>
+                <Col md={4}>
+                  <Form.Control
+                    type="number"
+                    placeholder="Quantità"
+                    value={riga.quantitaInclusa}
+                    onChange={(e) => aggiornaRiga(index, 'quantitaInclusa', e.target.value)}
+                  />
+                </Col>
+                <Col md={2}>
+                  {righeServizi.length > 1 && (
+                    <Button variant="outline-danger" size="sm" onClick={() => rimuoviRiga(index)}>
+                      X
+                    </Button>
+                  )}
+                </Col>
+              </Row>
+            ))}
+            <Button variant="outline-secondary" size="sm" onClick={aggiungiRiga} className="mt-2">
+              + Aggiungi servizio
+            </Button>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>Annulla</Button>
+            <Button type="submit" disabled={salvataggioInCorso} style={{ backgroundColor: '#3B5D45', borderColor: '#3B5D45' }}>
+              {salvataggioInCorso ? 'Salvataggio...' : 'Salva Pacchetto'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+    </div>
+  );
+}
+
 function TabAppuntamenti({ token }) {
   const [appuntamenti, setAppuntamenti] = useState([]);
   const [utenti, setUtenti] = useState([]);
@@ -358,6 +548,42 @@ function TabAppuntamenti({ token }) {
   );
 }
 
+function TabRecensioni({ token }) {
+  const [recensioni, setRecensioni] = useState([]);
+  const [caricamento, setCaricamento] = useState(true);
+  const [errore, setErrore] = useState(null);
+
+  useEffect(() => {
+    apiFetch('/api/recensioni', token)
+      .then((data) => { setRecensioni(data); setCaricamento(false); })
+      .catch((err) => { setErrore(err.message); setCaricamento(false); });
+  }, [token]);
+
+  return (
+    <div>
+      <h4 className="mb-3">Recensioni Ricevute</h4>
+      {errore && <Alert variant="danger">{errore}</Alert>}
+      {!caricamento && (
+        <Table responsive hover style={{ backgroundColor: '#EFE6D8' }}>
+          <thead><tr><th>Cliente</th><th>Voto</th><th>Commento</th><th>Data</th></tr></thead>
+          <tbody>
+            {recensioni
+              .sort((a, b) => new Date(b.creatoIl) - new Date(a.creatoIl))
+              .map((r) => (
+                <tr key={r.id}>
+                  <td>{r.utenteNomeCompleto}</td>
+                  <td>{'★'.repeat(r.voto)}{'☆'.repeat(5 - r.voto)}</td>
+                  <td>{r.commento}</td>
+                  <td>{new Date(r.creatoIl).toLocaleDateString('it-IT')}</td>
+                </tr>
+              ))}
+          </tbody>
+        </Table>
+      )}
+    </div>
+  );
+}
+
 function Admin() {
   const { token } = useAuth();
   return (
@@ -367,8 +593,14 @@ function Admin() {
         <Tab eventKey="servizi" title="Servizi">
           <TabServizi token={token} />
         </Tab>
+        <Tab eventKey="pacchetti" title="Pacchetti">
+          <TabPacchetti token={token} />
+        </Tab>
         <Tab eventKey="appuntamenti" title="Appuntamenti">
           <TabAppuntamenti token={token} />
+        </Tab>
+        <Tab eventKey="recensioni" title="Recensioni">
+          <TabRecensioni token={token} />
         </Tab>
       </Tabs>
     </Container>

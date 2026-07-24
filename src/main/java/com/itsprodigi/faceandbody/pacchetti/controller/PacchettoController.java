@@ -32,6 +32,14 @@ public class PacchettoController {
         return ResponseEntity.ok(pacchettoService.trovaPerId(id));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<PacchettoResponse> aggiorna(
+            @PathVariable Long id,
+            @Valid @RequestBody PacchettoRequest request
+    ) {
+        return ResponseEntity.ok(pacchettoService.aggiorna(id, request));
+    }
+
     @PostMapping
     public ResponseEntity<PacchettoResponse> crea(@Valid @RequestBody PacchettoRequest request) {
         PacchettoResponse response = pacchettoService.crea(request);

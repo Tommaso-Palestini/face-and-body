@@ -39,6 +39,29 @@ public class PacchettoService {
     }
 
     @Transactional
+    public PacchettoResponse aggiorna(Long id, PacchettoRequest request) {
+        Pacchetto pacchetto = trovaEntitaPerId(id);
+
+        pacchetto.setNome(request.nome());
+        pacchetto.setDescrizione(request.descrizione());
+        pacchetto.setPrezzo(request.prezzo());
+
+        pacchetto.getServizi().clear();
+        for (PacchettoServizioRequest ps : request.servizi()) {
+            Servizio servizio = servizioService.trovaEntitaPerId(ps.servizioId());
+            PacchettoServizio pacchettoServizio = PacchettoServizio.builder()
+                    .pacchetto(pacchetto)
+                    .servizio(servizio)
+                    .quantitaInclusa(ps.quantitaInclusa())
+                    .build();
+            pacchetto.getServizi().add(pacchettoServizio);
+        }
+
+        pacchetto = pacchettoRepository.save(pacchetto);
+        return toResponse(pacchetto);
+    }
+
+    @Transactional
     public PacchettoResponse crea(PacchettoRequest request) {
         Pacchetto pacchetto = Pacchetto.builder()
                 .nome(request.nome())
