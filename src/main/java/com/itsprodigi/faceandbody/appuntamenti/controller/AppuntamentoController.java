@@ -83,6 +83,16 @@ public class AppuntamentoController {
         return ResponseEntity.ok(appuntamentoService.trovaTutti());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/prenota/{utenteId}")
+    public ResponseEntity<AppuntamentoResponse> prenotaPerUtente(
+            @PathVariable Long utenteId,
+            @Valid @RequestBody AppuntamentoRequest request
+    ) {
+        AppuntamentoResponse response = appuntamentoService.prenotaPerUtente(request, utenteId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @GetMapping("/operatrici")
     public ResponseEntity<List<OperatriceResponse>> trovaOperatrici() {
         return ResponseEntity.ok(appuntamentoService.trovaOperatriciAttive());

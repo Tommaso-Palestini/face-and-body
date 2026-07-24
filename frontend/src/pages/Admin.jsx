@@ -125,9 +125,19 @@ function TabServizi({ token }) {
 
 function TabAppuntamenti({ token }) {
   const [appuntamenti, setAppuntamenti] = useState([]);
+  const [utenti, setUtenti] = useState([]);
+  const [servizi, setServizi] = useState([]);
+  const [operatrici, setOperatrici] = useState([]);
+  const [cabine, setCabine] = useState([]);
   const [caricamento, setCaricamento] = useState(true);
   const [errore, setErrore] = useState(null);
   const [messaggio, setMessaggio] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [salvataggioInCorso, setSalvataggioInCorso] = useState(false);
+
+  const [form, setForm] = useState({
+    utenteId: '', servizioId: '', data: '', ora: '', operatriceId: '', cabinaId: '',
+  });
 
   function carica() {
     apiFetch('/api/appuntamenti/admin/tutti', token)
@@ -135,6 +145,13 @@ function TabAppuntamenti({ token }) {
       .catch((err) => { setErrore(err.message); setCaricamento(false); });
   }
   useEffect(carica, [token]);
+
+  useEffect(() => {
+    apiFetch('/api/utenti', token).then(setUtenti).catch(() => {});
+    apiFetch('/api/servizi', token).then(setServizi).catch(() => {});
+    apiFetch('/api/appuntamenti/operatrici', token).then(setOperatrici).catch(() => {});
+    apiFetch('/api/appuntamenti/cabine', token).then(setCabine).catch(() => {});
+  }, [token]);
 
   async function handleCompleta(id) {
     try {
@@ -144,16 +161,50 @@ function TabAppuntamenti({ token }) {
     } catch (err) { setErrore(err.message); }
   }
 
+  function apriCreazione() {
+    setForm({ utenteId: '', servizioId: '', data: '', ora: '09:00', operatriceId: '', cabinaId: '' });
+    setShowModal(true);
+  }
+
+  async function handleSalva(e) {
+    e.preventDefault();
+    setErrore(null);
+    setSalvataggioInCorso(true);
+    try {
+      const dataOra = `${form.data}T${form.ora}:00`;
+      await apiFetch(`/api/appuntamenti/admin/prenota/${form.utenteId}`, token, {
+        method: 'POST',
+        body: JSON.stringify({
+          servizioId: Number(form.servizioId),
+          dataOra,
+          operatriceId: form.operatriceId ? Number(form.operatriceId) : null,
+          cabinaId: form.cabinaId ? Number(form.cabinaId) : null,
+        }),
+      });
+      setMessaggio('Appuntamento creato per il cliente.');
+      setShowModal(false);
+      carica();
+    } catch (err) { setErrore(err.message); }
+    finally { setSalvataggioInCorso(false); }
+  }
+
   const badgeColore = { CONFERMATO: '#3B5D45', COMPLETATO: '#6B8F71', CANCELLATO: '#a94442' };
 
   return (
     <div>
-      <h4 className="mb-3">Tutti gli Appuntamenti</h4>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4>Tutti gli Appuntamenti</h4>
+        <Button style={{ backgroundColor: '#3B5D45', borderColor: '#3B5D45' }} onClick={apriCreazione}>
+          <FaPlus style={{ marginRight: '0.4rem' }} />Nuovo (per cliente)
+        </Button>
+      </div>
+
       {errore && <Alert variant="danger" onClose={() => setErrore(null)} dismissible>{errore}</Alert>}
       {messaggio && <Alert variant="success" onClose={() => setMessaggio(null)} dismissible>{messaggio}</Alert>}
+
       {!caricamento && (
         <Table responsive hover style={{ backgroundColor: '#EFE6D8' }}>
-          <thead><tr><th>Cliente</th><th>Servizio</th><th>Data/Ora</th><th>Stato</th><th>Azioni</th></tr></thead>
+          <thead><tr><th>Cliente</th><th>Servizio</th><th>Data/Ora</th><th>Operatrice</th><th>Cabina</th><th>Stato</th><th>Azioni</th></tr></thead>
           <tbody>
             {appuntamenti
               .sort((a, b) => new Date(b.dataOra) - new Date(a.dataOra))
@@ -162,6 +213,8 @@ function TabAppuntamenti({ token }) {
                   <td>{a.utenteNomeCompleto}</td>
                   <td>{a.servizioNome}</td>
                   <td>{new Date(a.dataOra).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                  <td>{a.operatriceNome || '—'}</td>
+                  <td>{a.cabinaNome || '—'}</td>
                   <td><Badge style={{ backgroundColor: badgeColore[a.stato] }}>{a.stato}</Badge></td>
                   <td>
                     {a.stato === 'CONFERMATO' && (
@@ -175,6 +228,76 @@ function TabAppuntamenti({ token }) {
           </tbody>
         </Table>
       )}
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton><Modal.Title>Nuovo Appuntamento per un Cliente</Modal.Title></Modal.Header>
+        <Form onSubmit={handleSalva}>
+          <Modal.Body>
+            <Form.Group className="mb-3">
+              <Form.Label>Cliente</Form.Label>
+              <Form.Select value={form.utenteId} onChange={(e) => setForm({ ...form, utenteId: e.target.value })} required>
+                <option value="">Seleziona...</option>
+                {utenti.filter((u) => u.ruolo === 'CLIENTE').map((u) => (
+                  <option key={u.id} value={u.id}>{u.nome} {u.cognome} — {u.email}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Servizio</Form.Label>
+              <Form.Select value={form.servizioId} onChange={(e) => setForm({ ...form, servizioId: e.target.value })} required>
+                <option value="">Seleziona...</option>
+                {servizi.map((s) => (
+                  <option key={s.id} value={s.id}>{s.nome}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Data</Form.Label>
+                  <Form.Control type="date" value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} required />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Ora</Form.Label>
+                  <Form.Control type="time" value={form.ora} onChange={(e) => setForm({ ...form, ora: e.target.value })} required />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Operatrice</Form.Label>
+                  <Form.Select value={form.operatriceId} onChange={(e) => setForm({ ...form, operatriceId: e.target.value })}>
+                    <option value="">Nessuna</option>
+                    {operatrici.map((o) => (
+                      <option key={o.id} value={o.id}>{o.nome}</option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Cabina</Form.Label>
+                  <Form.Select value={form.cabinaId} onChange={(e) => setForm({ ...form, cabinaId: e.target.value })}>
+                    <option value="">Nessuna</option>
+                    {cabine.map((c) => (
+                      <option key={c.id} value={c.id}>{c.nome}</option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>Annulla</Button>
+            <Button type="submit" disabled={salvataggioInCorso} style={{ backgroundColor: '#3B5D45', borderColor: '#3B5D45' }}>
+              {salvataggioInCorso ? 'Salvataggio...' : 'Crea Appuntamento'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
     </div>
   );
 }

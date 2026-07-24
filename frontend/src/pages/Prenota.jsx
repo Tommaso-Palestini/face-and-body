@@ -88,8 +88,8 @@ function Calendario() {
   }, [token]);
 
   useEffect(() => {
-    apiFetch('/api/appuntamenti/operatrici', token).then(setOperatrici).catch(() => {});
-    apiFetch('/api/appuntamenti/cabine', token).then(setCabine).catch(() => {});
+    apiFetch('/api/appuntamenti/operatrici', token).then(setOperatrici).catch(() => { });
+    apiFetch('/api/appuntamenti/cabine', token).then(setCabine).catch(() => { });
   }, [token]);
 
   function caricaMieiAppuntamenti() {
@@ -139,7 +139,7 @@ function Calendario() {
           servizioId: Number(servizioId),
           dataOra,
           operatriceId: operatriceId ? Number(operatriceId) : null,
-          cabinaId: cabinaId ? Number(cabinaId) : null,
+          cabinaId: null,
         }),
       });
       setMessaggio('Appuntamento prenotato con successo!');
@@ -196,24 +196,13 @@ function Calendario() {
           </Form.Group>
 
           <Row>
-            <Col md={6}>
+            <Col md={12}>
               <Form.Group className="mb-3">
                 <Form.Label>Operatrice (opzionale)</Form.Label>
                 <Form.Select value={operatriceId} onChange={(e) => setOperatriceId(e.target.value)}>
                   <option value="">Nessuna preferenza</option>
                   {operatrici.map((o) => (
                     <option key={o.id} value={o.id}>{o.nome}</option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Cabina (opzionale)</Form.Label>
-                <Form.Select value={cabinaId} onChange={(e) => setCabinaId(e.target.value)}>
-                  <option value="">Nessuna preferenza</option>
-                  {cabine.map((c) => (
-                    <option key={c.id} value={c.id}>{c.nome}</option>
                   ))}
                 </Form.Select>
               </Form.Group>

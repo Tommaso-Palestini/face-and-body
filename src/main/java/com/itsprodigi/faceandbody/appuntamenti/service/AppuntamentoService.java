@@ -90,6 +90,49 @@ public class AppuntamentoService {
     }
 
     @Transactional
+    public AppuntamentoResponse prenotaPerUtente(AppuntamentoRequest request, Long utenteId) {
+        Servizio servizio = servizioService.trovaEntitaPerId(request.servizioId());
+
+        if (!servizio.isDisponibile()) {
+            throw new BusinessException("Il servizio richiesto non è disponibile", HttpStatus.BAD_REQUEST);
+        }
+
+        boolean slotOccupato = appuntamentoRepository.existsByServizioIdAndDataOraAndStatoNot(
+                request.servizioId(), request.dataOra(), Appuntamento.Stato.CANCELLATO
+        );
+        if (slotOccupato) {
+            throw new BusinessException("Slot non disponibile per la data/ora scelta", HttpStatus.CONFLICT);
+        }
+
+        Utente utente = utenteRepository.findById(utenteId)
+                .orElseThrow(() -> new BusinessException("Utente non trovato", HttpStatus.NOT_FOUND));
+
+        Operatrice operatrice = null;
+        if (request.operatriceId() != null) {
+            operatrice = operatriceRepository.findById(request.operatriceId())
+                    .orElseThrow(() -> new BusinessException("Operatrice non trovata", HttpStatus.NOT_FOUND));
+        }
+
+        Cabina cabina = null;
+        if (request.cabinaId() != null) {
+            cabina = cabinaRepository.findById(request.cabinaId())
+                    .orElseThrow(() -> new BusinessException("Cabina non trovata", HttpStatus.NOT_FOUND));
+        }
+
+        Appuntamento appuntamento = Appuntamento.builder()
+                .utente(utente)
+                .servizio(servizio)
+                .dataOra(request.dataOra())
+                .stato(Appuntamento.Stato.CONFERMATO)
+                .operatrice(operatrice)
+                .cabina(cabina)
+                .build();
+
+        appuntamento = appuntamentoRepository.save(appuntamento);
+        return toResponse(appuntamento);
+    }
+
+    @Transactional
     public void cancella(Long appuntamentoId, UtenteDetails utenteAutenticato) {
         Appuntamento appuntamento = trovaEntitaPerId(appuntamentoId);
         verificaOwnershipOAdmin(appuntamento, utenteAutenticato);
