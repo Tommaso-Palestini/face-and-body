@@ -14,6 +14,20 @@ INSERT INTO utenti (nome, cognome, email, password, ruolo, attivo, data_registra
 ('Mario', 'Rossi', 'mario.rossi@test.com', '$2b$10$rvGWATnYGGDf.424OoVzQeuFDZmLSSzRxgvXqIKlmArmqW6HSM4Ta', 'CLIENTE', 1, NOW()),
 ('Giulia', 'Bianchi', 'giulia.bianchi@test.com', '$2b$10$rvGWATnYGGDf.424OoVzQeuFDZmLSSzRxgvXqIKlmArmqW6HSM4Ta', 'CLIENTE', 1, NOW());
 
+-- Operatrici
+INSERT INTO operatrici (nome, attiva) VALUES
+('Debora', 1),
+('Miriam', 1),
+('Irene', 1);
+
+-- Cabine (dal gestionale)
+INSERT INTO cabine (nome, tipo, attiva) VALUES
+('Cabina Cera', 'Ceretta', 1),
+('Cabina Corpo', 'Trattamenti corpo', 1),
+('Cabina Viso', 'Trattamenti viso', 1),
+('Manicure', 'Postazione manicure', 1),
+('Pedicure', 'Postazione pedicure', 1);
+
 -- Servizi
 INSERT INTO servizi (nome, descrizione, prezzo, durata_muniti, disponibile) VALUES
 ('Manicure Classica', 'Trattamento completo per unghie e cuticole', 25.00, 45, 1),

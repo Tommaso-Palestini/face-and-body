@@ -78,8 +78,7 @@ class AppuntamentoServiceTest {
 
     @Test
     void prenota_conSlotLibero_creaAppuntamento() {
-        AppuntamentoRequest request = new AppuntamentoRequest(1L, LocalDateTime.now().plusDays(1));
-
+        AppuntamentoRequest request = new AppuntamentoRequest(1L, LocalDateTime.now().plusDays(1), null, null);
         when(servizioService.trovaEntitaPerId(1L)).thenReturn(servizio);
         when(appuntamentoRepository.existsByServizioIdAndDataOraAndStatoNot(
                 any(), any(), any())).thenReturn(false);
@@ -94,8 +93,7 @@ class AppuntamentoServiceTest {
 
     @Test
     void prenota_conSlotOccupato_lanciaBusinessException() {
-        AppuntamentoRequest request = new AppuntamentoRequest(1L, LocalDateTime.now().plusDays(1));
-
+        AppuntamentoRequest request = new AppuntamentoRequest(1L, LocalDateTime.now().plusDays(1), null, null);
         when(servizioService.trovaEntitaPerId(1L)).thenReturn(servizio);
         when(appuntamentoRepository.existsByServizioIdAndDataOraAndStatoNot(
                 any(), any(), any())).thenReturn(true);

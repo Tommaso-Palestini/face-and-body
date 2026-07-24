@@ -7,5 +7,7 @@ import java.time.LocalDateTime;
 
 public record AppuntamentoRequest(
         @NotNull Long servizioId,
-        @NotNull @Future(message = "La data dell'appuntamento deve essere futura") LocalDateTime dataOra
+        @NotNull @Future(message = "La data dell'appuntamento deve essere futura") LocalDateTime dataOra,
+        Long operatriceId,
+        Long cabinaId
 ) {}

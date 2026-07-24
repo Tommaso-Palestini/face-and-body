@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.itsprodigi.faceandbody.appuntamenti.dto.OperatriceResponse;
+import com.itsprodigi.faceandbody.appuntamenti.dto.CabinaResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -79,5 +81,15 @@ public class AppuntamentoController {
     @GetMapping("/admin/tutti")
     public ResponseEntity<List<AppuntamentoResponse>> trovaTutti() {
         return ResponseEntity.ok(appuntamentoService.trovaTutti());
+    }
+
+    @GetMapping("/operatrici")
+    public ResponseEntity<List<OperatriceResponse>> trovaOperatrici() {
+        return ResponseEntity.ok(appuntamentoService.trovaOperatriciAttive());
+    }
+
+    @GetMapping("/cabine")
+    public ResponseEntity<List<CabinaResponse>> trovaCabine() {
+        return ResponseEntity.ok(appuntamentoService.trovaCabineAttive());
     }
 }

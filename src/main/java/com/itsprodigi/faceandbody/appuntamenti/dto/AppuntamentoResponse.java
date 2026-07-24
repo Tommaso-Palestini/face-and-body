@@ -10,5 +10,7 @@ public record AppuntamentoResponse(
         String servizioNome,
         LocalDateTime dataOra,
         String stato,
-        LocalDateTime creatoIl
+        LocalDateTime creatoIl,
+        String operatriceNome,
+        String cabinaNome
 ) {}

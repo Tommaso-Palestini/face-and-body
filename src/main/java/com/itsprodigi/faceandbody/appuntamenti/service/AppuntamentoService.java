@@ -3,7 +3,11 @@ package com.itsprodigi.faceandbody.appuntamenti.service;
 import com.itsprodigi.faceandbody.appuntamenti.dto.AppuntamentoRequest;
 import com.itsprodigi.faceandbody.appuntamenti.dto.AppuntamentoResponse;
 import com.itsprodigi.faceandbody.appuntamenti.model.Appuntamento;
+import com.itsprodigi.faceandbody.appuntamenti.model.Cabina;
+import com.itsprodigi.faceandbody.appuntamenti.model.Operatrice;
 import com.itsprodigi.faceandbody.appuntamenti.repository.AppuntamentoRepository;
+import com.itsprodigi.faceandbody.appuntamenti.repository.CabinaRepository;
+import com.itsprodigi.faceandbody.appuntamenti.repository.OperatriceRepository;
 import com.itsprodigi.faceandbody.common.exception.BusinessException;
 import com.itsprodigi.faceandbody.security.UtenteDetails;
 import com.itsprodigi.faceandbody.servizi.model.Servizio;
@@ -13,6 +17,8 @@ import com.itsprodigi.faceandbody.utenti.repository.UtenteRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.itsprodigi.faceandbody.appuntamenti.dto.OperatriceResponse;
+import com.itsprodigi.faceandbody.appuntamenti.dto.CabinaResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,15 +29,21 @@ public class AppuntamentoService {
     private final AppuntamentoRepository appuntamentoRepository;
     private final ServizioService servizioService;
     private final UtenteRepository utenteRepository;
+    private final OperatriceRepository operatriceRepository;
+    private final CabinaRepository cabinaRepository;
 
     public AppuntamentoService(
             AppuntamentoRepository appuntamentoRepository,
             ServizioService servizioService,
-            UtenteRepository utenteRepository
+            UtenteRepository utenteRepository,
+            OperatriceRepository operatriceRepository,
+            CabinaRepository cabinaRepository
     ) {
         this.appuntamentoRepository = appuntamentoRepository;
         this.servizioService = servizioService;
         this.utenteRepository = utenteRepository;
+        this.operatriceRepository = operatriceRepository;
+        this.cabinaRepository = cabinaRepository;
     }
 
     @Transactional
@@ -52,11 +64,25 @@ public class AppuntamentoService {
         Utente utente = utenteRepository.findById(utenteAutenticato.getId())
                 .orElseThrow(() -> new BusinessException("Utente non trovato", HttpStatus.NOT_FOUND));
 
+        Operatrice operatrice = null;
+        if (request.operatriceId() != null) {
+            operatrice = operatriceRepository.findById(request.operatriceId())
+                    .orElseThrow(() -> new BusinessException("Operatrice non trovata", HttpStatus.NOT_FOUND));
+        }
+
+        Cabina cabina = null;
+        if (request.cabinaId() != null) {
+            cabina = cabinaRepository.findById(request.cabinaId())
+                    .orElseThrow(() -> new BusinessException("Cabina non trovata", HttpStatus.NOT_FOUND));
+        }
+
         Appuntamento appuntamento = Appuntamento.builder()
                 .utente(utente)
                 .servizio(servizio)
                 .dataOra(request.dataOra())
                 .stato(Appuntamento.Stato.CONFERMATO)
+                .operatrice(operatrice)
+                .cabina(cabina)
                 .build();
 
         appuntamento = appuntamentoRepository.save(appuntamento);
@@ -66,9 +92,7 @@ public class AppuntamentoService {
     @Transactional
     public void cancella(Long appuntamentoId, UtenteDetails utenteAutenticato) {
         Appuntamento appuntamento = trovaEntitaPerId(appuntamentoId);
-
         verificaOwnershipOAdmin(appuntamento, utenteAutenticato);
-
         appuntamento.setStato(Appuntamento.Stato.CANCELLATO);
         appuntamentoRepository.save(appuntamento);
     }
@@ -99,10 +123,20 @@ public class AppuntamentoService {
                 .toList();
     }
 
-    // Restituisce solo gli orari occupati (non i dettagli del cliente) per un servizio
-    // in un intervallo di date: usato dal frontend per disegnare il calendario di disponibilità
     public List<LocalDateTime> trovaSlotOccupati(Long servizioId, LocalDateTime inizio, LocalDateTime fine) {
         return appuntamentoRepository.findSlotOccupatiNelPeriodo(servizioId, inizio, fine);
+    }
+
+    public List<OperatriceResponse> trovaOperatriciAttive() {
+        return operatriceRepository.findByAttivaTrue().stream()
+                .map(o -> new OperatriceResponse(o.getId(), o.getNome()))
+                .toList();
+    }
+
+    public List<CabinaResponse> trovaCabineAttive() {
+        return cabinaRepository.findByAttivaTrue().stream()
+                .map(c -> new CabinaResponse(c.getId(), c.getNome(), c.getTipo()))
+                .toList();
     }
 
     public Appuntamento trovaEntitaPerId(Long id) {
@@ -131,7 +165,9 @@ public class AppuntamentoService {
                 appuntamento.getServizio().getNome(),
                 appuntamento.getDataOra(),
                 appuntamento.getStato().name(),
-                appuntamento.getCreatoIl()
+                appuntamento.getCreatoIl(),
+                appuntamento.getOperatrice() != null ? appuntamento.getOperatrice().getNome() : null,
+                appuntamento.getCabina() != null ? appuntamento.getCabina().getNome() : null
         );
     }
 }

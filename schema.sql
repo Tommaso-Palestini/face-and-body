@@ -29,6 +29,21 @@ CREATE TABLE servizi (
     disponibile BIT NOT NULL DEFAULT 1
 ) ENGINE=InnoDB;
 
+-- Operatrici
+CREATE TABLE operatrici (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    attiva BIT NOT NULL DEFAULT 1
+) ENGINE=InnoDB;
+
+-- Cabine
+CREATE TABLE cabine (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    tipo VARCHAR(255) NOT NULL,
+    attiva BIT NOT NULL DEFAULT 1
+) ENGINE=InnoDB;
+
 -- Appuntamenti
 CREATE TABLE appuntamenti (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -39,6 +54,8 @@ CREATE TABLE appuntamenti (
     creato_il DATETIME(6) NOT NULL,
     CONSTRAINT fk_appuntamenti_utente FOREIGN KEY (utente_id) REFERENCES utenti(id),
     CONSTRAINT fk_appuntamenti_servizio FOREIGN KEY (servizio_id) REFERENCES servizi(id)
+    operatrice_id BIGINT,
+    cabina_id BIGINT,
 ) ENGINE=InnoDB;
 
 -- Recensioni (relazione OneToOne con Appuntamento)
