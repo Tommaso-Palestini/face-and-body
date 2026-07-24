@@ -1,28 +1,35 @@
-# Face and Body — Backend
+# Face and Body — Full Stack
 
-Backend Java per la gestione di un centro estetico: utenti, servizi, appuntamenti, recensioni e pacchetti/abbonamenti, con autenticazione JWT e autorizzazione basata su ruoli e ownership.
+Applicazione full stack per la gestione di un centro estetico: backend Java (API REST) + frontend React. Gestisce utenti, servizi, appuntamenti (con operatrici e cabine), recensioni e pacchetti/abbonamenti, con autenticazione JWT e autorizzazione basata su ruoli e ownership.
 
 Project work finale — UF14 Java Backend, ITS Prodigi (Full Stack Developer).
 
 ## Stack tecnologico
 
-- Java 21
-- Spring Boot 4.0.7 (Web, Data JPA, Security, Validation)
+**Backend**
+- Java 21, Spring Boot 4.0.7 (Web, Data JPA, Security, Validation)
 - MySQL 8.4
 - JWT (jjwt 0.12.6)
 - JUnit 5 + Mockito + AssertJ
 - JaCoCo (copertura test)
-- Docker & Docker Compose
 - Maven
+
+**Frontend**
+- Vite + React
+- React Router
+- React Bootstrap
+- react-day-picker (calendario prenotazioni)
+- react-icons
+
+**Infrastruttura**
+- Docker & Docker Compose
 
 ## Prerequisiti
 
-- Docker e Docker Compose installati
-- (Solo per sviluppo locale senza Docker) JDK 21 e Maven 3.8+
+- Docker e Docker Compose (per il backend)
+- Node.js 18+ e npm (per il frontend)
 
-Non serve installare Java, Maven o MySQL sulla macchina se si usa Docker: l'intero ambiente è containerizzato.
-
-## Avvio rapido
+## Avvio del backend
 
 Dalla root del progetto:
 
@@ -30,36 +37,43 @@ Dalla root del progetto:
 docker compose up --build
 ```
 
-Il comando builda l'immagine dell'applicazione (build multi-stage) e avvia insieme il container MySQL e il container dell'app. L'app attende automaticamente che il database sia pronto (`healthcheck`) prima di avviarsi.
+Builda l'immagine dell'applicazione (build multi-stage) e avvia insieme MySQL e l'app. L'API sarà su:
 
-L'API sarà raggiungibile su:
-
-```
 http://localhost:8080
-```
 
-Per fermare l'ambiente:
-
-```bash
-docker compose down
-```
-
-Per fermarlo e rimuovere anche i dati del database (riparte da zero):
-
-```bash
-docker compose down -v
-```
+Per fermare l'ambiente: `docker compose down`. Per azzerare anche i dati: `docker compose down -v`.
 
 ## Popolamento del database
 
-Il database viene creato vuoto al primo avvio (Hibernate genera lo schema). Per popolarlo con dati di esempio pronti all'uso — utili anche per testare subito la Postman Collection — eseguire, a container MySQL avviato:
+```bash
+docker compose down -v
+docker volume rm faceandbody_mysql_data
+docker compose up -d mysql
+```
+
+Attendere ~15 secondi, poi:
 
 ```bash
 docker exec -i faceandbody-mysql mysql -u root -prootpassword < schema.sql
 docker exec -i faceandbody-mysql mysql -u root -prootpassword < data.sql
+docker compose up --build -d app
 ```
 
-`schema.sql` crea la struttura completa del database; `data.sql` inserisce un set minimo di dati: un utente Admin, due utenti Cliente, un catalogo di servizi, un pacchetto di esempio e un appuntamento già completato (utile per testare subito le recensioni).
+`schema.sql` crea la struttura completa (utenti, servizi, appuntamenti, recensioni, pacchetti, abbonamenti, operatrici, cabine). `data.sql` popola con: un Admin, due Clienti, il catalogo servizi reale, le tre operatrici, le cinque cabine, e un pacchetto/appuntamento di esempio.
+
+## Avvio del frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Il sito sarà su:
+
+http://localhost:5173
+
+Il backend deve essere già avviato: il frontend chiama le API su `http://localhost:8080`.
 
 ## Utenti di test
 
@@ -69,17 +83,19 @@ docker exec -i faceandbody-mysql mysql -u root -prootpassword < data.sql
 | Cliente | `mario.rossi@test.com` | `password123` |
 | Cliente | `giulia.bianchi@test.com` | `password123` |
 
-Sono presenti due utenti Cliente distinti per poter verificare il controllo di autorizzazione a livello di risorsa: un cliente può leggere, modificare o cancellare solo i propri appuntamenti; un Admin può operare su tutto.
+## Funzionalità
+
+**Pubblico**: Home, catalogo Servizi, catalogo Pacchetti, Chi Siamo, registrazione, login.
+
+**Cliente**: calendario prenotazioni con disponibilità in tempo reale e scelta operatrice, gestione dei propri appuntamenti, acquisto pacchetti, i propri abbonamenti, recensioni sui trattamenti completati.
+
+**Admin**: gestione servizi (crea/modifica/disattiva), gestione pacchetti (crea/modifica/disattiva, con servizi inclusi), vista su tutti gli appuntamenti con filtro per data, creazione di appuntamenti per conto di un cliente (con scelta di operatrice e cabina), completamento appuntamenti, stampa dell'agenda giornaliera con riepilogo, vista sulle recensioni ricevute.
 
 ## Autenticazione
 
 1. `POST /api/auth/registrazione` — crea un nuovo utente (ruolo CLIENTE)
 2. `POST /api/auth/login` — restituisce un token JWT
-3. Includere il token nelle richieste successive con l'header:
-
-```
-Authorization: Bearer <token>
-```
+3. Includere il token nelle richieste successive: `Authorization: Bearer <token>`
 
 ## Endpoint principali
 
@@ -89,26 +105,29 @@ Authorization: Bearer <token>
 | POST | `/api/auth/login` | Pubblico |
 | GET | `/api/servizi` | Pubblico |
 | POST / PUT / DELETE | `/api/servizi/**` | Admin |
+| GET | `/api/appuntamenti/operatrici` | Pubblico |
+| GET | `/api/appuntamenti/cabine` | Pubblico |
 | POST | `/api/appuntamenti` | Autenticato |
 | GET | `/api/appuntamenti/miei` | Autenticato |
 | GET | `/api/appuntamenti/disponibilita` | Autenticato |
 | DELETE | `/api/appuntamenti/{id}` | Proprietario o Admin |
 | PATCH | `/api/appuntamenti/{id}/completa` | Admin |
+| POST | `/api/appuntamenti/admin/prenota/{utenteId}` | Admin |
+| GET | `/api/appuntamenti/admin/tutti` | Admin |
 | POST | `/api/recensioni` | Autenticato |
+| GET | `/api/recensioni` | Admin |
 | GET | `/api/pacchetti` | Pubblico |
+| POST / PUT / DELETE | `/api/pacchetti/**` | Admin |
 | POST | `/api/pacchetti/{id}/acquista` | Autenticato |
+| GET | `/api/pacchetti/miei-abbonamenti` | Autenticato |
+| GET / PATCH | `/api/pacchetti/admin/abbonamenti/**` | Admin |
 | GET | `/api/utenti` | Admin |
 
-L'elenco completo degli endpoint, con esempi di richiesta/risposta, è nella Postman Collection allegata.
+L'elenco completo, con esempi di richiesta/risposta, è nella Postman Collection allegata.
 
 ## Testare con Postman
 
-Importare in Postman i due file forniti:
-
-- `Face-and-Body-API.postman_collection.json` — tutte le richieste, organizzate per modulo
-- `face-and-body-Local.postman_environment.json` — variabili d'ambiente (`base_url`, token)
-
-Selezionare l'environment importato, eseguire le richieste di login (Auth → Login Mario / Login Giulia / Login Admin): il token viene salvato automaticamente nelle variabili d'ambiente e riutilizzato dalle altre richieste.
+Importare `Face-and-Body-API.postman_collection.json` e `face-and-body-Local.postman_environment.json`. Selezionare l'environment, eseguire le richieste di login (Auth → Login Mario / Login Giulia / Login Admin): il token viene salvato automaticamente e riutilizzato dalle altre richieste.
 
 ## Eseguire i test e la copertura
 
@@ -116,29 +135,29 @@ Selezionare l'environment importato, eseguire le richieste di login (Auth → Lo
 mvn clean test
 ```
 
-Il report di copertura JaCoCo viene generato in `target/site/jacoco/index.html`.
+Report di copertura in `target/site/jacoco/index.html`.
 
 ## Struttura del progetto
 
-```
-src/main/java/com/itsprodigi/faceandbody/
-├── utenti/          # Gestione utenti, registrazione, login
-├── servizi/         # Catalogo servizi
-├── appuntamenti/    # Prenotazioni e controllo disponibilità
-├── recensioni/      # Recensioni sugli appuntamenti completati
-├── pacchetti/       # Pacchetti/abbonamenti
-├── security/        # Configurazione Spring Security e JWT
-└── common/          # Eccezioni ed exception handler condivisi
-```
-
-Ogni modulo segue la stessa struttura interna: `controller/`, `service/`, `repository/`, `model/`, `dto/`.
+├── src/main/java/com/itsprodigi/faceandbody/
+│ ├── utenti/ # Gestione utenti, registrazione, login
+│ ├── servizi/ # Catalogo servizi
+│ ├── appuntamenti/ # Prenotazioni, disponibilità, operatrici, cabine
+│ ├── recensioni/ # Recensioni sugli appuntamenti completati
+│ ├── pacchetti/ # Pacchetti/abbonamenti
+│ ├── security/ # Configurazione Spring Security, JWT, CORS
+│ └── common/ # Eccezioni ed exception handler condivisi
+└── frontend/
+└── src/
+├── pages/ # Home, Servizi, Pacchetti, ChiSiamo, Login, Registrati, Prenota, MieiAbbonamenti, MieRecensioni, Admin
+├── components/ # Navbar, Footer
+├── context/ # AuthContext (stato login, JWT)
+└── utils/ # Helper per le chiamate API autenticate
 
 ## Deliverable inclusi
 
-- Codice sorgente completo
-- `schema.sql` — struttura del database
-- `data.sql` — dati di popolamento
-- `Dockerfile` — build multi-stage dell'applicazione
-- `docker-compose.yml` — orchestrazione app + database
+- Codice sorgente completo (backend + frontend)
+- `schema.sql` + `data.sql`
+- `Dockerfile` + `docker-compose.yml`
 - `Face-and-Body-API.postman_collection.json` + environment
-- `Relazione_Tecnica_FaceAndBody.docx` — relazione tecnica del progetto
+- `Relazione_Tecnica_FaceAndBody.docx`
