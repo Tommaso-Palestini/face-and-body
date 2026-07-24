@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Container, Form, Button, Alert, Row, Col, Card, Spinner, Badge } from 'react-bootstrap';
+import { Container, Form, Button, Alert, Row, Col, Card, Badge } from 'react-bootstrap';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/style.css';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,6 @@ function formatDataOraISO(data, orario) {
   const [ore, minuti] = orario.split(':');
   const d = new Date(data);
   d.setHours(Number(ore), Number(minuti), 0, 0);
-  // formato locale senza fuso, come si aspetta il backend (LocalDateTime)
   const pad = (n) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
 }
@@ -65,6 +64,10 @@ function Calendario() {
 
   const [servizi, setServizi] = useState([]);
   const [servizioId, setServizioId] = useState('');
+  const [operatrici, setOperatrici] = useState([]);
+  const [cabine, setCabine] = useState([]);
+  const [operatriceId, setOperatriceId] = useState('');
+  const [cabinaId, setCabinaId] = useState('');
   const [meseVisualizzato, setMeseVisualizzato] = useState(new Date());
   const [slotOccupati, setSlotOccupati] = useState([]);
   const [giornoSelezionato, setGiornoSelezionato] = useState(null);
@@ -75,7 +78,6 @@ function Calendario() {
   const [messaggio, setMessaggio] = useState(null);
   const [caricamento, setCaricamento] = useState(false);
 
-  // Carica il catalogo servizi una volta
   useEffect(() => {
     apiFetch('/api/servizi', token)
       .then((data) => {
@@ -85,7 +87,11 @@ function Calendario() {
       .catch((err) => setErrore(err.message));
   }, [token]);
 
-  // Carica i miei appuntamenti
+  useEffect(() => {
+    apiFetch('/api/appuntamenti/operatrici', token).then(setOperatrici).catch(() => {});
+    apiFetch('/api/appuntamenti/cabine', token).then(setCabine).catch(() => {});
+  }, [token]);
+
   function caricaMieiAppuntamenti() {
     apiFetch('/api/appuntamenti/miei', token)
       .then(setMieiAppuntamenti)
@@ -93,7 +99,6 @@ function Calendario() {
   }
   useEffect(caricaMieiAppuntamenti, [token]);
 
-  // Carica gli slot occupati quando cambia servizio o mese
   useEffect(() => {
     if (!servizioId) return;
     const inizio = new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), 1);
@@ -130,13 +135,17 @@ function Calendario() {
       const dataOra = formatDataOraISO(giornoSelezionato, orarioSelezionato);
       await apiFetch('/api/appuntamenti', token, {
         method: 'POST',
-        body: JSON.stringify({ servizioId: Number(servizioId), dataOra }),
+        body: JSON.stringify({
+          servizioId: Number(servizioId),
+          dataOra,
+          operatriceId: operatriceId ? Number(operatriceId) : null,
+          cabinaId: cabinaId ? Number(cabinaId) : null,
+        }),
       });
       setMessaggio('Appuntamento prenotato con successo!');
       setOrarioSelezionato(null);
       setGiornoSelezionato(null);
       caricaMieiAppuntamenti();
-      // ricarica disponibilità
       setMeseVisualizzato(new Date(meseVisualizzato));
     } catch (err) {
       setErrore(err.message);
@@ -158,7 +167,6 @@ function Calendario() {
   }
 
   const giorniOccupatiCompleti = useMemo(() => {
-    // un giorno è "pieno" se tutti gli orari disponibili sono occupati
     const mappa = {};
     slotOccupati.forEach((iso) => {
       const giorno = new Date(iso).toDateString();
@@ -186,6 +194,31 @@ function Calendario() {
               ))}
             </Form.Select>
           </Form.Group>
+
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Operatrice (opzionale)</Form.Label>
+                <Form.Select value={operatriceId} onChange={(e) => setOperatriceId(e.target.value)}>
+                  <option value="">Nessuna preferenza</option>
+                  {operatrici.map((o) => (
+                    <option key={o.id} value={o.id}>{o.nome}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Cabina (opzionale)</Form.Label>
+                <Form.Select value={cabinaId} onChange={(e) => setCabinaId(e.target.value)}>
+                  <option value="">Nessuna preferenza</option>
+                  {cabine.map((c) => (
+                    <option key={c.id} value={c.id}>{c.nome}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
 
           <div style={{ backgroundColor: '#EFE6D8', borderRadius: '12px', padding: '1rem' }}>
             <DayPicker
@@ -252,6 +285,9 @@ function Calendario() {
                       day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
                     })}
                   </div>
+                  {app.operatriceNome && (
+                    <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>Con {app.operatriceNome}</div>
+                  )}
                   <Badge style={{ backgroundColor: app.stato === 'CANCELLATO' ? '#a94442' : '#3B5D45', marginTop: '0.3rem' }}>
                     {app.stato}
                   </Badge>
