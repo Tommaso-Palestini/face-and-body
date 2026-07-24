@@ -38,8 +38,6 @@ public class PacchettoService {
         this.utenteRepository = utenteRepository;
     }
 
-    // --- Gestione catalogo (Admin) ---
-
     @Transactional
     public PacchettoResponse crea(PacchettoRequest request) {
         Pacchetto pacchetto = Pacchetto.builder()
@@ -49,7 +47,6 @@ public class PacchettoService {
                 .disponibile(true)
                 .build();
 
-        // Prima salviamo il pacchetto per avere l'id, poi agganciamo i servizi collegati
         pacchetto = pacchettoRepository.save(pacchetto);
 
         for (PacchettoServizioRequest ps : request.servizi()) {
@@ -83,8 +80,6 @@ public class PacchettoService {
         return toResponse(trovaEntitaPerId(id));
     }
 
-    // --- Acquisto e consumo (Cliente) ---
-
     @Transactional
     public AbbonamentoUtenteResponse acquista(Long pacchettoId, UtenteDetails utenteAutenticato) {
         Pacchetto pacchetto = trovaEntitaPerId(pacchettoId);
@@ -96,7 +91,6 @@ public class PacchettoService {
         Utente utente = utenteRepository.findById(utenteAutenticato.getId())
                 .orElseThrow(() -> new BusinessException("Utente non trovato", HttpStatus.NOT_FOUND));
 
-        // Sessioni totali = somma delle quantità incluse in tutti i servizi del pacchetto
         int sessioniTotali = pacchetto.getServizi().stream()
                 .mapToInt(PacchettoServizio::getQuantitaInclusa)
                 .sum();
@@ -126,7 +120,6 @@ public class PacchettoService {
 
         abbonamento.setSessioniRimanenti(abbonamento.getSessioniRimanenti() - 1);
 
-        // Se le sessioni finiscono, l'abbonamento passa automaticamente a ESAURITO
         if (abbonamento.getSessioniRimanenti() == 0) {
             abbonamento.setStato(AbbonamentoUtente.Stato.ESAURITO);
         }
@@ -138,6 +131,46 @@ public class PacchettoService {
         return abbonamentoRepository.findByUtenteId(utenteAutenticato.getId()).stream()
                 .map(this::toAbbonamentoResponse)
                 .toList();
+    }
+
+    // --- Gestione Admin ---
+
+    public List<AbbonamentoAdminResponse> trovaTuttiAbbonamenti() {
+        return abbonamentoRepository.findAll().stream()
+                .map(a -> new AbbonamentoAdminResponse(
+                        a.getId(),
+                        a.getUtente().getNome() + " " + a.getUtente().getCognome(),
+                        a.getPacchetto().getId(),
+                        a.getPacchetto().getNome(),
+                        a.getSessioniRimanenti(),
+                        a.getStato().name(),
+                        a.getAcquistatoIl()
+                ))
+                .toList();
+    }
+
+    @Transactional
+    public AbbonamentoAdminResponse aggiornaSessioniAdmin(Long abbonamentoId, Integer nuoveSessioni) {
+        AbbonamentoUtente abbonamento = abbonamentoRepository.findById(abbonamentoId)
+                .orElseThrow(() -> new BusinessException("Abbonamento non trovato", HttpStatus.NOT_FOUND));
+
+        abbonamento.setSessioniRimanenti(nuoveSessioni);
+        if (nuoveSessioni == 0 && abbonamento.getStato() == AbbonamentoUtente.Stato.ATTIVO) {
+            abbonamento.setStato(AbbonamentoUtente.Stato.ESAURITO);
+        } else if (nuoveSessioni > 0 && abbonamento.getStato() == AbbonamentoUtente.Stato.ESAURITO) {
+            abbonamento.setStato(AbbonamentoUtente.Stato.ATTIVO);
+        }
+
+        abbonamento = abbonamentoRepository.save(abbonamento);
+        return new AbbonamentoAdminResponse(
+                abbonamento.getId(),
+                abbonamento.getUtente().getNome() + " " + abbonamento.getUtente().getCognome(),
+                abbonamento.getPacchetto().getId(),
+                abbonamento.getPacchetto().getNome(),
+                abbonamento.getSessioniRimanenti(),
+                abbonamento.getStato().name(),
+                abbonamento.getAcquistatoIl()
+        );
     }
 
     private Pacchetto trovaEntitaPerId(Long id) {

@@ -1,13 +1,12 @@
 package com.itsprodigi.faceandbody.pacchetti.controller;
 
-import com.itsprodigi.faceandbody.pacchetti.dto.AbbonamentoUtenteResponse;
-import com.itsprodigi.faceandbody.pacchetti.dto.PacchettoRequest;
-import com.itsprodigi.faceandbody.pacchetti.dto.PacchettoResponse;
+import com.itsprodigi.faceandbody.pacchetti.dto.*;
 import com.itsprodigi.faceandbody.pacchetti.service.PacchettoService;
 import com.itsprodigi.faceandbody.security.UtenteDetails;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +22,6 @@ public class PacchettoController {
         this.pacchettoService = pacchettoService;
     }
 
-    // Pubblico: catalogo pacchetti
     @GetMapping
     public ResponseEntity<List<PacchettoResponse>> trovaTuttiDisponibili() {
         return ResponseEntity.ok(pacchettoService.trovaTuttiDisponibili());
@@ -34,7 +32,6 @@ public class PacchettoController {
         return ResponseEntity.ok(pacchettoService.trovaPerId(id));
     }
 
-    // Solo Admin (vedi SecurityConfig)
     @PostMapping
     public ResponseEntity<PacchettoResponse> crea(@Valid @RequestBody PacchettoRequest request) {
         PacchettoResponse response = pacchettoService.crea(request);
@@ -47,7 +44,6 @@ public class PacchettoController {
         return ResponseEntity.noContent().build();
     }
 
-    // Cliente: acquista un pacchetto
     @PostMapping("/{id}/acquista")
     public ResponseEntity<AbbonamentoUtenteResponse> acquista(
             @PathVariable Long id,
@@ -57,11 +53,27 @@ public class PacchettoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Cliente: vede i propri abbonamenti attivi/esauriti
     @GetMapping("/miei-abbonamenti")
     public ResponseEntity<List<AbbonamentoUtenteResponse>> trovaMieiAbbonamenti(
             @AuthenticationPrincipal UtenteDetails utenteAutenticato
     ) {
         return ResponseEntity.ok(pacchettoService.trovaMieiAbbonamenti(utenteAutenticato));
+    }
+
+    // --- Admin ---
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/abbonamenti")
+    public ResponseEntity<List<AbbonamentoAdminResponse>> trovaTuttiAbbonamenti() {
+        return ResponseEntity.ok(pacchettoService.trovaTuttiAbbonamenti());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/admin/abbonamenti/{id}")
+    public ResponseEntity<AbbonamentoAdminResponse> aggiornaSessioni(
+            @PathVariable Long id,
+            @Valid @RequestBody AggiornaSessioniRequest request
+    ) {
+        return ResponseEntity.ok(pacchettoService.aggiornaSessioniAdmin(id, request.sessioniRimanenti()));
     }
 }
