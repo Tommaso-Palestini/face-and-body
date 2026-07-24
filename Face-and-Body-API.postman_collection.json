@@ -358,6 +358,34 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Raccolta recensioni",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/recensioni",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recensioni"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -700,6 +728,114 @@
                 "api",
                 "pacchetti",
                 "miei-abbonamenti"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin tutti gli abbonamenti",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pacchetti/admin/abbonamenti",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacchetti",
+                "admin",
+                "abbonamenti"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin - modifica sessioni abbonamento",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessioniRimanenti\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/pacchetti/admin/abbonamenti/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacchetti",
+                "admin",
+                "abbonamenti",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin modifica pacchetto",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Pacchetto Aggiornato\",\n  \"descrizione\": \"Descrizione aggiornata\",\n  \"prezzo\": 200.00,\n  \"servizi\": [\n    { \"servizioId\": 1, \"quantitaInclusa\": 3 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/pacchetti/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacchetti",
+                "1"
               ]
             }
           },
