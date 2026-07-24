@@ -53,9 +53,9 @@ CREATE TABLE appuntamenti (
     stato ENUM('CONFERMATO', 'CANCELLATO', 'COMPLETATO') NOT NULL,
     creato_il DATETIME(6) NOT NULL,
     CONSTRAINT fk_appuntamenti_utente FOREIGN KEY (utente_id) REFERENCES utenti(id),
-    CONSTRAINT fk_appuntamenti_servizio FOREIGN KEY (servizio_id) REFERENCES servizi(id)
+    CONSTRAINT fk_appuntamenti_servizio FOREIGN KEY (servizio_id) REFERENCES servizi(id),
     operatrice_id BIGINT,
-    cabina_id BIGINT,
+    cabina_id BIGINT
 ) ENGINE=InnoDB;
 
 -- Recensioni (relazione OneToOne con Appuntamento)
