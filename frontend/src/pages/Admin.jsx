@@ -226,11 +226,32 @@ function TabAppuntamenti({ token }) {
 
       {!caricamento && (
         <div className="stampa-area">
-          {dataFiltro && (
-            <h4 style={{ marginBottom: '1rem' }}>
-              Agenda del {new Date(dataFiltro).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}
-            </h4>
-          )}
+          {dataFiltro && (() => {
+            const appuntamentiGiorno = appuntamenti.filter((a) => a.dataOra.startsWith(dataFiltro));
+            const completati = appuntamentiGiorno.filter((a) => a.stato === 'COMPLETATO');
+            const clientiUnici = [...new Set(appuntamentiGiorno.map((a) => a.utenteNomeCompleto))];
+            const trattamentiConteggio = {};
+            appuntamentiGiorno.forEach((a) => {
+              trattamentiConteggio[a.servizioNome] = (trattamentiConteggio[a.servizioNome] || 0) + 1;
+            });
+
+            return (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h4 style={{ marginBottom: '0.5rem' }}>
+                  Agenda del {new Date(dataFiltro).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </h4>
+                <p style={{ marginBottom: '0.3rem' }}>
+                  <strong>{appuntamentiGiorno.length}</strong> appuntamenti totali —{' '}
+                  <strong>{completati.length}</strong> completati —{' '}
+                  <strong>{clientiUnici.length}</strong> clienti diversi
+                </p>
+                <p style={{ marginBottom: 0, fontSize: '0.9rem', opacity: 0.85 }}>
+                  Trattamenti: {Object.entries(trattamentiConteggio).map(([nome, n]) => `${nome} (${n})`).join(', ') || 'nessuno'}
+                </p>
+              </div>
+            );
+          })()}
+
           <Table responsive hover style={{ backgroundColor: '#EFE6D8' }}>
             <thead>
               <tr>

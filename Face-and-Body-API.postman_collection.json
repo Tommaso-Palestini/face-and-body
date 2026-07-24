@@ -544,6 +544,84 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Get Operatrici",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti/operatrici",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti",
+                "operatrici"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cabine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti/cabine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti",
+                "cabine"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prenota per Cliente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"servizioId\": 1,\n  \"dataOra\": \"2026-09-10T10:00:00\",\n  \"operatriceId\": 1,\n  \"cabinaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appuntamenti/admin/prenota/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appuntamenti",
+                "admin",
+                "prenota",
+                "1"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
