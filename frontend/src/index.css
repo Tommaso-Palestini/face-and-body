@@ -49,3 +49,33 @@ a {
   background-color: var(--color-primary) !important;
   color: var(--color-white) !important;
 }
+
+/* Stili solo per la stampa (agenda giornaliera Admin) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .stampa-area, .stampa-area * {
+    visibility: visible;
+  }
+  .stampa-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .no-stampa {
+    display: none !important;
+  }
+  .stampa-area table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .stampa-area th, .stampa-area td {
+    border: 1px solid #333;
+    padding: 8px;
+    text-align: left;
+    color: #000;
+    background: #fff !important;
+  }
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container, Table, Button, Form, Modal, Alert, Tabs, Tab, Badge } from 'react-bootstrap';
+import { Container, Table, Button, Form, Modal, Alert, Tabs, Tab, Badge, Row, Col } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../utils/api';
 import { FaEdit, FaBan, FaPlus, FaCheck } from 'react-icons/fa';
@@ -134,6 +134,7 @@ function TabAppuntamenti({ token }) {
   const [messaggio, setMessaggio] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [salvataggioInCorso, setSalvataggioInCorso] = useState(false);
+  const [dataFiltro, setDataFiltro] = useState('');
 
   const [form, setForm] = useState({
     utenteId: '', servizioId: '', data: '', ora: '', operatriceId: '', cabinaId: '',
@@ -192,41 +193,75 @@ function TabAppuntamenti({ token }) {
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex justify-content-between align-items-center mb-3 no-stampa">
         <h4>Tutti gli Appuntamenti</h4>
         <Button style={{ backgroundColor: '#3B5D45', borderColor: '#3B5D45' }} onClick={apriCreazione}>
           <FaPlus style={{ marginRight: '0.4rem' }} />Nuovo (per cliente)
         </Button>
       </div>
 
-      {errore && <Alert variant="danger" onClose={() => setErrore(null)} dismissible>{errore}</Alert>}
-      {messaggio && <Alert variant="success" onClose={() => setMessaggio(null)} dismissible>{messaggio}</Alert>}
+      <div className="no-stampa">
+        {errore && <Alert variant="danger" onClose={() => setErrore(null)} dismissible>{errore}</Alert>}
+        {messaggio && <Alert variant="success" onClose={() => setMessaggio(null)} dismissible>{messaggio}</Alert>}
+      </div>
+
+      <div className="d-flex align-items-center gap-2 mb-3 no-stampa">
+        <Form.Control
+          type="date"
+          value={dataFiltro}
+          onChange={(e) => setDataFiltro(e.target.value)}
+          style={{ maxWidth: '200px' }}
+        />
+        {dataFiltro && (
+          <>
+            <Button variant="outline-secondary" size="sm" onClick={() => setDataFiltro('')}>
+              Mostra tutti
+            </Button>
+            <Button variant="outline-primary" size="sm" onClick={() => window.print()}>
+              Stampa
+            </Button>
+          </>
+        )}
+      </div>
 
       {!caricamento && (
-        <Table responsive hover style={{ backgroundColor: '#EFE6D8' }}>
-          <thead><tr><th>Cliente</th><th>Servizio</th><th>Data/Ora</th><th>Operatrice</th><th>Cabina</th><th>Stato</th><th>Azioni</th></tr></thead>
-          <tbody>
-            {appuntamenti
-              .sort((a, b) => new Date(b.dataOra) - new Date(a.dataOra))
-              .map((a) => (
-                <tr key={a.id}>
-                  <td>{a.utenteNomeCompleto}</td>
-                  <td>{a.servizioNome}</td>
-                  <td>{new Date(a.dataOra).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
-                  <td>{a.operatriceNome || '—'}</td>
-                  <td>{a.cabinaNome || '—'}</td>
-                  <td><Badge style={{ backgroundColor: badgeColore[a.stato] }}>{a.stato}</Badge></td>
-                  <td>
-                    {a.stato === 'CONFERMATO' && (
-                      <Button variant="outline-success" size="sm" onClick={() => handleCompleta(a.id)}>
-                        <FaCheck style={{ marginRight: '0.3rem' }} />Completa
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </Table>
+        <div className="stampa-area">
+          {dataFiltro && (
+            <h4 style={{ marginBottom: '1rem' }}>
+              Agenda del {new Date(dataFiltro).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}
+            </h4>
+          )}
+          <Table responsive hover style={{ backgroundColor: '#EFE6D8' }}>
+            <thead>
+              <tr>
+                <th>Cliente</th><th>Servizio</th><th>Data/Ora</th><th>Operatrice</th><th>Cabina</th><th>Stato</th>
+                <th className="no-stampa">Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {appuntamenti
+                .filter((a) => !dataFiltro || a.dataOra.startsWith(dataFiltro))
+                .sort((a, b) => new Date(b.dataOra) - new Date(a.dataOra))
+                .map((a) => (
+                  <tr key={a.id}>
+                    <td>{a.utenteNomeCompleto}</td>
+                    <td>{a.servizioNome}</td>
+                    <td>{new Date(a.dataOra).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                    <td>{a.operatriceNome || '—'}</td>
+                    <td>{a.cabinaNome || '—'}</td>
+                    <td><Badge style={{ backgroundColor: badgeColore[a.stato] }}>{a.stato}</Badge></td>
+                    <td className="no-stampa">
+                      {a.stato === 'CONFERMATO' && (
+                        <Button variant="outline-success" size="sm" onClick={() => handleCompleta(a.id)}>
+                          <FaCheck style={{ marginRight: '0.3rem' }} />Completa
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </div>
       )}
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -306,8 +341,8 @@ function Admin() {
   const { token } = useAuth();
   return (
     <Container style={{ padding: '3rem 1rem', minHeight: '70vh' }}>
-      <h1 className="mb-4">Dashboard Admin</h1>
-      <Tabs defaultActiveKey="servizi" className="mb-4">
+      <h1 className="mb-4 no-stampa">Dashboard Admin</h1>
+      <Tabs defaultActiveKey="servizi" className="mb-4 no-stampa">
         <Tab eventKey="servizi" title="Servizi">
           <TabServizi token={token} />
         </Tab>
